@@ -1,0 +1,16 @@
+{
+  "invoice_number": "21000",
+  "date": "2026-03-28",
+  "client_name": "www",
+  "amount": 20,
+  "paid": 20,
+  "amount_due": 0,
+  "profit": 0,
+  "commission": 0,
+  "status": "Paid",
+  "hidden_remarks": "",
+  "created_by": "admin@example.com",
+  "id": "inv-1774685831906-182",
+  "is_deleted": false,
+  "created_at": "2026-03-28T08:17:11.907Z"
+}

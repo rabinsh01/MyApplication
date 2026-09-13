@@ -1,0 +1,16 @@
+{
+  "invoice_number": "awe",
+  "date": "2026-03-28",
+  "client_name": "suhaib",
+  "amount": 50,
+  "paid": 50,
+  "amount_due": 0,
+  "profit": 2,
+  "commission": 0,
+  "status": "Paid",
+  "hidden_remarks": "good",
+  "created_by": "admin@example.com",
+  "id": "inv-1774685394975-693",
+  "is_deleted": false,
+  "created_at": "2026-03-28T08:09:54.975Z"
+}
