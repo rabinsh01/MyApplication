@@ -2,11 +2,12 @@
 
 import React, { useState, useMemo } from 'react'
 import { Invoice } from '@/lib/fs-db'
-import { Search, Filter, Download, MoreVertical, Edit2, Trash2, FileText, CheckCircle2, AlertCircle, Clock, ExternalLink } from 'lucide-react'
+import { Search, Filter, Download, MoreVertical, Edit2, Trash2, FileText, CheckCircle2, AlertCircle, Clock, ExternalLink, CreditCard, Printer } from 'lucide-react'
 import { format, parseISO, isBefore, startOfDay } from 'date-fns'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import PaymentReceiptModal from './PaymentReceiptModal'
 
 interface Props {
     initialInvoices: Invoice[]
@@ -27,6 +28,7 @@ export default function InvoiceTable({ initialInvoices }: Props) {
     const [showOverdue, setShowOverdue] = useState(false)
     const [dateStart, setDateStart] = useState('')
     const [dateEnd, setDateEnd] = useState('')
+    const [receiptInvoice, setReceiptInvoice] = useState<Invoice | null>(null)
 
     const handleSoftDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this invoice?')) return
@@ -224,6 +226,9 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                                     </div>
                                 )}
                                 <div className="flex items-center gap-3">
+                                    <button onClick={() => setReceiptInvoice(inv)} className="bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" title="View Payment Receipt">
+                                        <Printer className="h-4 w-4" />
+                                    </button>
                                     <button onClick={() => handleDownloadPdf(inv.id, inv.invoice_number)} className="bg-white p-2 rounded-lg shadow-sm border border-slate-100 text-blue-600 hover:text-blue-700 transition-all active:scale-95" title="Download PDF">
                                         <Download className="h-4 w-4" />
                                     </button>
@@ -304,6 +309,9 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => setReceiptInvoice(inv)} className="p-2 hover:bg-white rounded-lg hover:shadow-sm border border-transparent hover:border-slate-200 text-emerald-600 transition-all hover:scale-110" title="View Payment Receipt / History">
+                                                <Printer className="h-4 w-4" />
+                                            </button>
                                             <button onClick={() => handleDownloadPdf(inv.id, inv.invoice_number)} className="p-2 hover:bg-white rounded-lg hover:shadow-sm border border-transparent hover:border-slate-200 text-blue-600 transition-all hover:scale-110" title="Download PDF">
                                                 <Download className="h-4 w-4" />
                                             </button>
@@ -332,6 +340,14 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                     </tbody>
                 </table>
             </div>
+
+            {/* ── PAYMENT RECEIPT MODAL ── */}
+            {receiptInvoice && (
+                <PaymentReceiptModal
+                    invoice={receiptInvoice}
+                    onClose={() => setReceiptInvoice(null)}
+                />
+            )}
         </div>
     )
 }

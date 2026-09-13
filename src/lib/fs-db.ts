@@ -12,6 +12,17 @@ export interface LineItem {
     total: number
 }
 
+export interface InvoicePayment {
+    id: string
+    invoice_id: string
+    payment_date: string
+    amount: number
+    payment_method: 'Cash' | 'Card' | 'Bank Transfer' | 'Online' | 'Other'
+    notes?: string
+    created_at?: string
+    updated_at?: string
+}
+
 export interface Invoice {
     id: string
     invoice_number: string
@@ -27,6 +38,7 @@ export interface Invoice {
     hidden_remarks?: string
     invoice_description?: string
     line_items?: LineItem[]
+    payments?: InvoicePayment[]
     is_deleted: boolean
     created_at: string
 }
@@ -76,7 +88,25 @@ export async function getInvoice(id: string): Promise<Invoice | null> {
         .single()
 
     if (error || !data) return null
-    return data as Invoice
+
+    const invoice = data as Invoice
+    const payments = await getInvoicePayments(id)
+    invoice.payments = payments
+
+    if (payments && payments.length > 0) {
+        const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+        const amountDue = Math.max(0, invoice.amount - totalPaid)
+        let status: 'Paid' | 'Partially Paid' | 'Unpaid' = 'Unpaid'
+        if (invoice.amount > 0) {
+            if (totalPaid >= invoice.amount) status = 'Paid'
+            else if (totalPaid > 0) status = 'Partially Paid'
+        }
+        invoice.paid = totalPaid
+        invoice.amount_due = amountDue
+        invoice.status = status
+    }
+
+    return invoice
 }
 
 export async function createInvoice(data: Omit<Invoice, 'id' | 'created_at' | 'is_deleted'>): Promise<Invoice> {
@@ -249,4 +279,133 @@ export async function updateClientRecord(name: string, updates: { name?: string,
     }
 
     return data
+}
+
+// -------------------------------------------------------------
+// Invoice Payments CRUD
+// -------------------------------------------------------------
+
+export async function getInvoicePayments(invoiceId: string): Promise<InvoicePayment[]> {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('invoice_payments')
+        .select('*')
+        .eq('invoice_id', invoiceId)
+        .order('payment_date', { ascending: true })
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching payments:', error)
+        return []
+    }
+    return (data as InvoicePayment[]) || []
+}
+
+export async function recalculateInvoiceTotals(invoiceId: string): Promise<{ totalPaid: number; amountDue: number; status: 'Paid' | 'Partially Paid' | 'Unpaid' }> {
+    const supabase = await createClient()
+
+    // 1. Fetch invoice total amount
+    const { data: inv, error: invErr } = await supabase
+        .from('invoices')
+        .select('amount')
+        .eq('id', invoiceId)
+        .single()
+
+    if (invErr || !inv) {
+        throw new Error('Invoice not found for recalculation')
+    }
+
+    const totalAmount = Number(inv.amount) || 0
+
+    // 2. Sum payments
+    const payments = await getInvoicePayments(invoiceId)
+    const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+    const amountDue = Math.max(0, totalAmount - totalPaid)
+
+    let status: 'Paid' | 'Partially Paid' | 'Unpaid' = 'Unpaid'
+    if (totalAmount > 0) {
+        if (totalPaid >= totalAmount) status = 'Paid'
+        else if (totalPaid > 0) status = 'Partially Paid'
+        else status = 'Unpaid'
+    }
+
+    // 3. Update invoices table
+    await supabase
+        .from('invoices')
+        .update({
+            paid: totalPaid,
+            amount_due: amountDue,
+            status: status
+        })
+        .eq('id', invoiceId)
+
+    return { totalPaid, amountDue, status }
+}
+
+export async function createInvoicePayment(data: Omit<InvoicePayment, 'id' | 'created_at' | 'updated_at'>): Promise<InvoicePayment> {
+    const supabase = await createClient()
+    const id = crypto.randomUUID()
+
+    const { data: inserted, error } = await supabase
+        .from('invoice_payments')
+        .insert({
+            ...data,
+            id,
+            updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error creating payment:', error)
+        throw new Error(error.message)
+    }
+
+    // Automatically recalculate invoice totals
+    await recalculateInvoiceTotals(data.invoice_id)
+
+    return inserted as InvoicePayment
+}
+
+export async function updateInvoicePayment(id: string, updates: Partial<InvoicePayment>): Promise<InvoicePayment | null> {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('invoice_payments')
+        .update({
+            ...updates,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+    if (error || !data) {
+        console.error('Error updating payment:', error)
+        return null
+    }
+
+    // Automatically recalculate invoice totals
+    if (data.invoice_id) {
+        await recalculateInvoiceTotals(data.invoice_id)
+    }
+
+    return data as InvoicePayment
+}
+
+export async function deleteInvoicePayment(id: string, invoiceId: string): Promise<boolean> {
+    const supabase = await createClient()
+    const { error } = await supabase
+        .from('invoice_payments')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error deleting payment:', error)
+        return false
+    }
+
+    // Automatically recalculate invoice totals
+    await recalculateInvoiceTotals(invoiceId)
+
+    return true
 }

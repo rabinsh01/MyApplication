@@ -296,8 +296,52 @@ export async function generateInvoicePdf(id: string): Promise<Uint8Array | null>
     drawText('In Words:', 45, yRow, 10, font)
     drawText(formatAmountToWords(invoice.amount), 150, yRow, 10, fontBold)
 
+    yRow -= 25
+
+    // --- PAYMENT HISTORY SECTION (If staged payments exist) ---
+    if (invoice.payments && invoice.payments.length > 0) {
+        drawText('PAYMENT HISTORY', 40, yRow, 11, fontBold)
+        yRow -= 18
+
+        page.drawRectangle({
+            x: 40,
+            y: yRow - 4,
+            width: width - 80,
+            height: 18,
+            color: rgb(0.93, 0.95, 0.98)
+        })
+
+        drawText('Date', 45, yRow, 9, fontBold)
+        drawText('Payment Method', 180, yRow, 9, fontBold)
+        drawText('Notes', 320, yRow, 9, fontBold)
+        const pHeaderW = fontBold.widthOfTextAtSize('Amount (AED)', 9)
+        drawText('Amount (AED)', colX.total - pHeaderW, yRow, 9, fontBold)
+
+        yRow -= 18
+
+        const sortedPdfPayments = [...invoice.payments].sort((p1, p2) => p1.payment_date.localeCompare(p2.payment_date))
+
+        sortedPdfPayments.forEach(p => {
+            drawText(p.payment_date, 45, yRow, 9, font)
+            drawText(p.payment_method, 180, yRow, 9, font)
+            drawText((p.notes || '-').substring(0, 30), 320, yRow, 8, font, rgb(0.4, 0.4, 0.4))
+            const pAmtStr = Number(p.amount).toFixed(2)
+            const pAmtW = fontBold.widthOfTextAtSize(pAmtStr, 9)
+            drawText(pAmtStr, colX.total - pAmtW, yRow, 9, fontBold, rgb(0.05, 0.4, 0.25))
+
+            page.drawLine({
+                start: { x: 40, y: yRow - 4 },
+                end: { x: width - 40, y: yRow - 4 },
+                thickness: 0.2,
+                color: rgb(0.9, 0.9, 0.9)
+            })
+
+            yRow -= 16
+        })
+    }
+
     // --- Footer Section ---
-    const footerY = 100
+    const footerY = 80
     page.drawLine({ start: { x: 40, y: footerY }, end: { x: width - 40, y: footerY }, thickness: 0.5, color: rgb(0.8, 0.8, 0.8) })
 
     // Thank you message
