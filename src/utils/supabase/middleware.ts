@@ -1,6 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function cleanUrl(rawUrl?: string): string {
+    if (!rawUrl) return ''
+    let u = rawUrl.trim()
+    u = u.replace(/\/+$/, '')
+    u = u.replace(/\/(auth|rest)\/v\d+.*$/i, '')
+    return u
+}
+
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,
@@ -9,8 +17,10 @@ export async function updateSession(request: NextRequest) {
     // We only redirect for html routes, not APIs
     const isApiRoute = request.nextUrl.pathname.startsWith('/api')
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
+
+    const url = cleanUrl(rawUrl)
 
     if (!url || !key) {
         console.error("Supabase ENV missing in middleware.")
@@ -19,7 +29,7 @@ export async function updateSession(request: NextRequest) {
 
     const supabase = createServerClient(
         url,
-        key,
+        key.trim(),
         {
             cookies: {
                 getAll() {
