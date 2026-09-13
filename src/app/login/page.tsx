@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { login } from '@/app/login/actions'
 import { Mail, Lock, Loader2, FileText } from 'lucide-react'
 
 export default function LoginPage() {
@@ -17,24 +17,17 @@ export default function LoginPage() {
 
         try {
             const formData = new FormData(e.currentTarget)
-            const email = formData.get('email') as string
-            const password = formData.get('password') as string
+            const res = await login(formData)
 
-            const supabase = createClient()
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            })
-
-            if (authError) {
-                setError(authError.message)
+            if (res?.error) {
+                setError(res.error)
                 setIsLoading(false)
             } else {
                 router.refresh() // Clear Next.js cache so layout.tsx sees the new cookie
                 router.push('/dashboard')
             }
         } catch (err: any) {
-            setError(err.message || 'Server error occurred during login. Did you configure Vercel environment variables?')
+            setError(err.message || 'An error occurred during login. Did you configure Vercel environment variables?')
             setIsLoading(false)
         }
     }
