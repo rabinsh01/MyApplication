@@ -9,14 +9,17 @@ export async function updateSession(request: NextRequest) {
     // We only redirect for html routes, not APIs
     const isApiRoute = request.nextUrl.pathname.startsWith('/api')
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
+
+    if (!url || !key) {
         console.error("Supabase ENV missing in middleware.")
         return NextResponse.next({ request })
     }
 
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        url,
+        key,
         {
             cookies: {
                 getAll() {
@@ -36,10 +39,8 @@ export async function updateSession(request: NextRequest) {
     )
 
     const {
-        data: { session },
-    } = await supabase.auth.getSession()
-
-    const user = session?.user
+        data: { user },
+    } = await supabase.auth.getUser()
 
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
 
