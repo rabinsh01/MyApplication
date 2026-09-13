@@ -27,7 +27,10 @@ export default function LoginPage() {
                 router.push('/dashboard')
             }
         } catch (err: any) {
-            setError(err.message || 'An error occurred during login. Did you configure Vercel environment variables?')
+            if (err?.message?.includes('NEXT_REDIRECT') || err?.digest?.includes('NEXT_REDIRECT')) {
+                return
+            }
+            setError(err.message || 'An error occurred during login.')
             setIsLoading(false)
         }
     }
