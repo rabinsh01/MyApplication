@@ -110,7 +110,7 @@ export default function InvoiceTable({ initialInvoices }: Props) {
     }, [invoices, search, statusFilter, showDeleted, showOverdue, dateStart, dateEnd])
 
     return (
-        <div className="bg-white border text-sm border-neutral-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
+        <div className="w-full min-w-0 bg-white border text-sm border-neutral-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl overflow-hidden">
             <div className="p-6 border-b border-neutral-100 bg-[#FAFAFA] space-y-4">
                 <div className="flex flex-col lg:flex-row gap-4 justify-between">
                     <div className="relative flex-1 max-w-xl">
