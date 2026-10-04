@@ -850,11 +850,13 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
                         <form onSubmit={handleSavePayment} className="py-6 space-y-6 text-sm">
                             <div>
-                                <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
+                                <label htmlFor="payment_date" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
                                     Payment Date <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     required
+                                    id="payment_date"
+                                    name="payment_date"
                                     type="date"
                                     value={paymentModalData.payment_date}
                                     onChange={e => setPaymentModalData(prev => ({ ...prev, payment_date: e.target.value }))}
@@ -864,7 +866,7 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest">
+                                    <label htmlFor="payment_amount" className="block text-xs font-black text-zinc-400 uppercase tracking-widest">
                                         Amount Paid (AED) <span className="text-rose-500">*</span>
                                     </label>
                                     <span className="text-[10px] font-bold text-zinc-400">
@@ -873,6 +875,8 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                 </div>
                                 <input
                                     required
+                                    id="payment_amount"
+                                    name="payment_amount"
                                     type="number"
                                     step="0.01"
                                     min="0.01"
@@ -881,14 +885,17 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                     onChange={e => setPaymentModalData(prev => ({ ...prev, amount: e.target.value }))}
                                     className="w-full border border-neutral-200 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 font-black text-zinc-950"
                                     placeholder="0.00"
+                                    autoComplete="off"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
+                                <label htmlFor="payment_method" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
                                     Payment Method <span className="text-rose-500">*</span>
                                 </label>
                                 <select
+                                    id="payment_method"
+                                    name="payment_method"
                                     value={paymentModalData.payment_method}
                                     onChange={e => setPaymentModalData(prev => ({ ...prev, payment_method: e.target.value as any }))}
                                     className="w-full border border-neutral-200 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 font-bold text-zinc-950 bg-white"
@@ -902,10 +909,12 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                             </div>
 
                             <div>
-                                <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
+                                <label htmlFor="payment_notes" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-2">
                                     Notes <span className="text-neutral-300 font-normal">(Optional)</span>
                                 </label>
                                 <textarea
+                                    id="payment_notes"
+                                    name="payment_notes"
                                     rows={2}
                                     value={paymentModalData.notes}
                                     onChange={e => setPaymentModalData(prev => ({ ...prev, notes: e.target.value }))}
