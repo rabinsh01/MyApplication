@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getInvoice, updateInvoicePayment, deleteInvoicePayment } from '@/lib/fs-db'
 import { createClient } from '@/utils/supabase/server'
 
@@ -62,6 +63,11 @@ export async function PUT(
             return NextResponse.json({ error: 'Failed to update payment record' }, { status: 500 })
         }
 
+        revalidatePath('/dashboard')
+        revalidatePath(`/dashboard/edit/${invoiceId}`)
+        revalidatePath('/dashboard/clients')
+        revalidatePath('/dashboard/clients/[name]', 'page')
+
         return NextResponse.json(updated)
     } catch (error: any) {
         console.error('Error in PUT /api/invoices/[id]/payments/[paymentId]:', error)
@@ -87,6 +93,11 @@ export async function DELETE(
         if (!success) {
             return NextResponse.json({ error: 'Failed to delete payment record' }, { status: 404 })
         }
+
+        revalidatePath('/dashboard')
+        revalidatePath(`/dashboard/edit/${invoiceId}`)
+        revalidatePath('/dashboard/clients')
+        revalidatePath('/dashboard/clients/[name]', 'page')
 
         return NextResponse.json({ message: 'Payment deleted successfully' })
     } catch (error: any) {

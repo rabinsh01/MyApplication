@@ -76,7 +76,42 @@ export async function getInvoices(includeDeleted = false): Promise<Invoice[]> {
         console.error('Error fetching invoices:', error)
         return []
     }
-    return (data as Invoice[]) || []
+
+    const invoices = (data as Invoice[]) || []
+    if (invoices.length === 0) return invoices
+
+    const { data: paymentRows, error: paymentsError } = await supabase
+        .from('invoice_payments')
+        .select('invoice_id, amount')
+        .in('invoice_id', invoices.map(invoice => invoice.id))
+
+    if (paymentsError) {
+        console.error('Error fetching invoice payments for balances:', paymentsError)
+        return invoices
+    }
+
+    const paidByInvoice = new Map<string, number>()
+    for (const payment of paymentRows || []) {
+        paidByInvoice.set(
+            payment.invoice_id,
+            (paidByInvoice.get(payment.invoice_id) || 0) + Number(payment.amount || 0)
+        )
+    }
+
+    return invoices.map(invoice => {
+        const totalPaid = paidByInvoice.has(invoice.id)
+            ? paidByInvoice.get(invoice.id)!
+            : Number(invoice.paid) || 0
+        const amountDue = Math.max(0, Number(invoice.amount) - totalPaid)
+        let status: Invoice['status'] = 'Unpaid'
+
+        if (Number(invoice.amount) > 0) {
+            if (totalPaid >= Number(invoice.amount)) status = 'Paid'
+            else if (totalPaid > 0) status = 'Partially Paid'
+        }
+
+        return { ...invoice, paid: totalPaid, amount_due: amountDue, status }
+    })
 }
 
 export async function getInvoice(id: string): Promise<Invoice | null> {

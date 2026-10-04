@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Invoice } from '@/lib/fs-db'
 import { Search, Filter, Download, MoreVertical, Edit2, Trash2, FileText, CheckCircle2, AlertCircle, Clock, ExternalLink, CreditCard, Printer } from 'lucide-react'
 import { format, parseISO, isBefore, startOfDay } from 'date-fns'
@@ -29,6 +29,10 @@ export default function InvoiceTable({ initialInvoices }: Props) {
     const [dateStart, setDateStart] = useState('')
     const [dateEnd, setDateEnd] = useState('')
     const [receiptInvoice, setReceiptInvoice] = useState<Invoice | null>(null)
+
+    useEffect(() => {
+        setInvoices(initialInvoices)
+    }, [initialInvoices])
 
     const handleSoftDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this invoice?')) return

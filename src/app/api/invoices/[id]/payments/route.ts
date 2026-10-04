@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getInvoice, getInvoicePayments, createInvoicePayment } from '@/lib/fs-db'
+import { revalidatePath } from 'next/cache'
+import { getInvoicePayments, createInvoicePayment } from '@/lib/fs-db'
 import { createClient } from '@/utils/supabase/server'
 
 export async function GET(
@@ -47,20 +48,38 @@ export async function POST(
             return NextResponse.json({ error: 'Payment amount must be greater than 0.' }, { status: 400 })
         }
 
-        const invoice = await getInvoice(id)
-        if (!invoice) {
+        // Fetch invoice total directly — avoids triggering auto-migration side effects inside getInvoice()
+        const { data: invoiceRow, error: invoiceErr } = await supabase
+            .from('invoices')
+            .select('id, amount')
+            .eq('id', id)
+            .single()
+
+        if (invoiceErr || !invoiceRow) {
+            console.error('Invoice lookup error:', invoiceErr)
             return NextResponse.json({ error: 'Invoice not found.' }, { status: 404 })
         }
 
-        const existingPayments = invoice.payments || []
-        const currentTotalPaid = existingPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
-        const remainingBalance = Math.max(0, invoice.amount - currentTotalPaid)
+        // Sum existing payments directly from DB
+        const { data: existingPayments, error: paymentsErr } = await supabase
+            .from('invoice_payments')
+            .select('amount')
+            .eq('invoice_id', id)
+
+        if (paymentsErr) {
+            console.error('Payments lookup error:', paymentsErr)
+            return NextResponse.json({ error: 'Failed to fetch existing payments.' }, { status: 500 })
+        }
+
+        const currentTotalPaid = (existingPayments || []).reduce(
+            (sum: number, p: any) => sum + Number(p.amount || 0), 0
+        )
+        const remainingBalance = Math.max(0, Number(invoiceRow.amount) - currentTotalPaid)
 
         if (remainingBalance <= 0) {
             return NextResponse.json({ error: 'This invoice is already fully paid.' }, { status: 400 })
         }
 
-        // Allow a tiny tolerance for floating point comparisons (e.g. 0.001)
         if (amount > remainingBalance + 0.001) {
             return NextResponse.json({
                 error: `Payment amount cannot exceed the remaining balance of AED ${remainingBalance.toFixed(2)}.`
@@ -74,6 +93,11 @@ export async function POST(
             payment_method,
             notes
         })
+
+        revalidatePath('/dashboard')
+        revalidatePath(`/dashboard/edit/${id}`)
+        revalidatePath('/dashboard/clients')
+        revalidatePath('/dashboard/clients/[name]', 'page')
 
         return NextResponse.json(newPayment, { status: 201 })
     } catch (error: any) {
