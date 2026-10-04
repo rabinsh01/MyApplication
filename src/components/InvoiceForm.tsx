@@ -391,6 +391,7 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 toast.success('Payment recorded successfully')
             }
             setIsPaymentModalOpen(false)
+            router.refresh()
         } catch (err: any) {
             toast.error(err.message || 'Failed to save payment')
         }
@@ -411,6 +412,7 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
             setPayments(prev => prev.filter(item => item.id !== p.id))
             toast.success('Payment deleted successfully')
+            router.refresh()
         } catch (err: any) {
             toast.error(err.message || 'Failed to delete payment')
         }

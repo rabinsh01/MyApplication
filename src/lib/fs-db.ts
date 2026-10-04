@@ -151,9 +151,19 @@ export async function createInvoice(data: Omit<Invoice, 'id' | 'created_at' | 'i
 
 export async function updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice | null> {
     const supabase = await createClient()
+
+    const payments = await getInvoicePayments(id)
+    const finalUpdates = { ...updates }
+
+    if (payments && payments.length > 0) {
+        delete finalUpdates.paid
+        delete finalUpdates.amount_due
+        delete finalUpdates.status
+    }
+
     const { data, error } = await supabase
         .from('invoices')
-        .update(updates)
+        .update(finalUpdates)
         .eq('id', id)
         .select()
         .single()
@@ -163,7 +173,12 @@ export async function updateInvoice(id: string, updates: Partial<Invoice>): Prom
         throw new Error(error.message)
     }
     if (!data) throw new Error('Invoice not found')
-    return data as Invoice
+
+    if (payments && payments.length > 0) {
+        await recalculateInvoiceTotals(id)
+    }
+
+    return await getInvoice(id)
 }
 
 export async function deleteInvoice(id: string): Promise<boolean> {
