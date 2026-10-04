@@ -90,7 +90,24 @@ export async function getInvoice(id: string): Promise<Invoice | null> {
     if (error || !data) return null
 
     const invoice = data as Invoice
-    const payments = await getInvoicePayments(id)
+    let payments = await getInvoicePayments(id)
+
+    // Auto-migrate existing invoice paid amount if no payments exist yet
+    if ((!payments || payments.length === 0) && Number(invoice.paid) > 0) {
+        try {
+            const initPayment = await createInvoicePayment({
+                invoice_id: id,
+                payment_date: invoice.date || new Date().toISOString().split('T')[0],
+                amount: Number(invoice.paid),
+                payment_method: 'Other',
+                notes: 'Initial Payment'
+            })
+            payments = [initPayment]
+        } catch (e) {
+            console.error('Auto-seeding initial payment record failed:', e)
+        }
+    }
+
     invoice.payments = payments
 
     if (payments && payments.length > 0) {
