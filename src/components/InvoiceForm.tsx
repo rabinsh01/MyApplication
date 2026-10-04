@@ -432,6 +432,7 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
     }
 
     return (
+        <>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white border border-neutral-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-3xl p-8 sm:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-10 pb-6 border-b border-neutral-100">
                 <h2 className="text-3xl font-black tracking-tight text-zinc-950">{isEdit ? 'Edit Invoice' : 'Create Invoice'}</h2>
@@ -442,18 +443,20 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Invoice Number <span className="text-rose-500">*</span></label>
-                    <input required type="text" name="invoice_number" value={formData.invoice_number} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all" placeholder="INV-001" />
+                    <label htmlFor="invoice-number" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Invoice Number <span className="text-rose-500">*</span></label>
+                    <input required id="invoice-number" type="text" name="invoice_number" value={formData.invoice_number} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all" placeholder="INV-001" />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Date <span className="text-rose-500">*</span></label>
-                    <input required type="date" name="date" value={formData.date} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all" />
+                    <label htmlFor="invoice-date" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Date <span className="text-rose-500">*</span></label>
+                    <input required id="invoice-date" type="date" name="date" value={formData.date} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all" />
                 </div>
 
                 <div className="md:col-span-2 relative z-30">
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Client Name <span className="text-rose-500">*</span></label>
+                    <label htmlFor="client-name-select" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Client Name <span className="text-rose-500">*</span></label>
                     <CreatableSelect
+                        inputId="client-name-select"
+                        name="client_name_select"
                         isClearable
                         isDisabled={loading}
                         isLoading={loading}
@@ -497,8 +500,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                     <div className="md:col-span-2 bg-[#FAFAFA] p-6 rounded-3xl border border-neutral-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">New Client Mobile <span className="text-neutral-300">(Optional)</span></label>
+                                <label htmlFor="new-client-mobile" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">New Client Mobile <span className="text-neutral-300">(Optional)</span></label>
                                 <input
+                                    id="new-client-mobile"
+                                    name="new_client_mobile"
                                     type="text"
                                     value={newClientMobile}
                                     onChange={e => setNewClientMobile(e.target.value)}
@@ -507,8 +512,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">New Client Email <span className="text-neutral-300">(Optional)</span></label>
+                                <label htmlFor="new-client-email" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">New Client Email <span className="text-neutral-300">(Optional)</span></label>
                                 <input
+                                    id="new-client-email"
+                                    name="new_client_email"
                                     type="email"
                                     value={newClientEmail}
                                     onChange={e => setNewClientEmail(e.target.value)}
@@ -523,7 +530,7 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
                 <div className="md:col-span-2">
                     <div className="flex items-center justify-between mb-4 border-b border-neutral-100 pb-2">
-                        <label className="text-[10px] font-black text-zinc-950 uppercase tracking-[0.2em]">Selected Services <span className="text-rose-500">*</span></label>
+                        <p className="text-[10px] font-black text-zinc-950 uppercase tracking-[0.2em]">Selected Services <span className="text-rose-500">*</span></p>
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{lineItems.length} Items</span>
                     </div>
 
@@ -542,6 +549,9 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <input
+                                                id={`line-item-${item.id}-name`}
+                                                name={`line_item_${item.id}_name`}
+                                                aria-label="Service name"
                                                 type="text"
                                                 value={item.name}
                                                 onChange={e => updateLineItem(item.id, { name: e.target.value })}
@@ -549,6 +559,9 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                                 placeholder="Service name..."
                                             />
                                             <input
+                                                id={`line-item-${item.id}-description`}
+                                                name={`line_item_${item.id}_description`}
+                                                aria-label="Service description"
                                                 type="text"
                                                 value={item.description || ''}
                                                 onChange={e => updateLineItem(item.id, { description: e.target.value })}
@@ -557,8 +570,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                             />
                                             <div className="flex flex-wrap items-center gap-3 mt-2">
                                                 <div className="flex items-center gap-1.5">
-                                                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Qty</label>
+                                                    <label htmlFor={`line-item-${item.id}-quantity`} className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Qty</label>
                                                     <input
+                                                        id={`line-item-${item.id}-quantity`}
+                                                        name={`line_item_${item.id}_quantity`}
                                                         type="number"
                                                         value={item.qty}
                                                         onChange={e => updateLineItem(item.id, { qty: parseFloat(e.target.value) || 0 })}
@@ -566,8 +581,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Rate</label>
+                                                    <label htmlFor={`line-item-${item.id}-rate`} className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Rate</label>
                                                     <input
+                                                        id={`line-item-${item.id}-rate`}
+                                                        name={`line_item_${item.id}_rate`}
                                                         type="number"
                                                         value={item.rate}
                                                         onChange={e => updateLineItem(item.id, { rate: parseFloat(e.target.value) || 0 })}
@@ -575,8 +592,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <label className="text-xs font-bold text-blue-500 uppercase tracking-wide">Govt</label>
+                                                    <label htmlFor={`line-item-${item.id}-government-charge`} className="text-xs font-bold text-blue-500 uppercase tracking-wide">Govt</label>
                                                     <input
+                                                        id={`line-item-${item.id}-government-charge`}
+                                                        name={`line_item_${item.id}_government_charge`}
                                                         type="number"
                                                         value={item.govt_charge}
                                                         onChange={e => updateLineItem(item.id, { govt_charge: parseFloat(e.target.value) || 0 })}
@@ -584,8 +603,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <label className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Srvc</label>
+                                                    <label htmlFor={`line-item-${item.id}-service-charge`} className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Srvc</label>
                                                     <input
+                                                        id={`line-item-${item.id}-service-charge`}
+                                                        name={`line_item_${item.id}_service_charge`}
                                                         type="number"
                                                         value={item.service_charge}
                                                         onChange={e => updateLineItem(item.id, { service_charge: parseFloat(e.target.value) || 0 })}
@@ -611,8 +632,10 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                     )}
 
                     <div className="bg-zinc-50 p-6 rounded-3xl border border-neutral-200 mb-8 relative z-20">
-                        <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Add Service from Predefined List</label>
+                        <label htmlFor="service-select" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Add Service from Predefined List</label>
                         <CreatableSelect
+                            inputId="service-select"
+                            name="service_select"
                             isClearable
                             isDisabled={loading}
                             isLoading={loading}
@@ -659,35 +682,35 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Govt Charge (AED)</label>
-                    <input readOnly type="number" name="commission" value={formData.commission} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-medium" />
+                    <label htmlFor="invoice-commission" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Govt Charge (AED)</label>
+                    <input readOnly id="invoice-commission" type="number" name="commission" value={formData.commission} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-medium" />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Service Charge (AED)</label>
-                    <input readOnly type="number" name="profit" value={formData.profit} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-medium" />
+                    <label htmlFor="invoice-profit" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Service Charge (AED)</label>
+                    <input readOnly id="invoice-profit" type="number" name="profit" value={formData.profit} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-medium" />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Billed Amount (AED)</label>
-                    <input readOnly type="number" name="amount" value={formData.amount} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-black" placeholder="0" />
+                    <label htmlFor="invoice-amount" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Total Billed Amount (AED)</label>
+                    <input readOnly id="invoice-amount" type="number" name="amount" value={formData.amount} className="w-full border border-neutral-200 rounded-full py-3 px-5 outline-none bg-[#FAFAFA] text-zinc-600 cursor-not-allowed font-black" placeholder="0" />
                 </div>
 
                 {!isEdit && (
                     <div>
-                        <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Initial Amount Paid (AED)</label>
-                        <input type="number" name="paid" value={formData.paid} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none transition-all font-medium" placeholder="0" />
+                        <label htmlFor="invoice-paid" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Initial Amount Paid (AED)</label>
+                        <input id="invoice-paid" type="number" name="paid" value={formData.paid} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none transition-all font-medium" placeholder="0" />
                     </div>
                 )}
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Remaining Balance (AED)</label>
-                    <input readOnly type="number" name="amount_due" value={remainingBalance} className="w-full border border-neutral-100 rounded-full py-3 px-5 outline-none bg-zinc-100 cursor-not-allowed font-black text-zinc-950" />
+                    <label htmlFor="invoice-amount-due" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Remaining Balance (AED)</label>
+                    <input readOnly id="invoice-amount-due" type="number" name="amount_due" value={remainingBalance} className="w-full border border-neutral-100 rounded-full py-3 px-5 outline-none bg-zinc-100 cursor-not-allowed font-black text-zinc-950" />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Payment Status</label>
-                    <select disabled={isEdit} name="status" value={calculatedStatus} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none appearance-none bg-white font-black text-zinc-950 uppercase tracking-widest text-[10px] disabled:bg-zinc-100 disabled:cursor-not-allowed">
+                    <label htmlFor="invoice-status" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Payment Status</label>
+                    <select id="invoice-status" disabled={isEdit} name="status" value={calculatedStatus} onChange={handleChange} className="w-full border border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none appearance-none bg-white font-black text-zinc-950 uppercase tracking-widest text-[10px] disabled:bg-zinc-100 disabled:cursor-not-allowed">
                         <option value="Unpaid">Unpaid</option>
                         <option value="Partially Paid">Partially Paid</option>
                         <option value="Paid">Paid</option>
@@ -810,13 +833,13 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 )}
 
                 <div className="md:col-span-2">
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Invoice Summary <span className="text-zinc-300 normal-case font-medium tracking-normal">(editable — auto-filled from services)</span></label>
-                    <textarea name="invoice_description" value={formData.invoice_description} onChange={handleChange} rows={2} className="w-full border border-neutral-200 bg-white rounded-2xl shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium text-zinc-700 text-sm transition-all resize-none" placeholder="e.g. TAWJEEH, DAMAN, BATHAKKA FEE" />
+                    <label htmlFor="invoice-description" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Invoice Summary <span className="text-zinc-300 normal-case font-medium tracking-normal">(editable — auto-filled from services)</span></label>
+                    <textarea id="invoice-description" name="invoice_description" value={formData.invoice_description} onChange={handleChange} rows={2} className="w-full border border-neutral-200 bg-white rounded-2xl shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium text-zinc-700 text-sm transition-all resize-none" placeholder="e.g. TAWJEEH, DAMAN, BATHAKKA FEE" />
                 </div>
 
                 <div className="md:col-span-2">
-                    <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">Hidden Remarks <span className="bg-zinc-100 px-2 py-0.5 rounded-full text-[10px] text-zinc-500">Dashboard Only</span></label>
-                    <textarea name="hidden_remarks" value={formData.hidden_remarks} onChange={handleChange} rows={2} className="w-full border border-neutral-200 bg-neutral-50 rounded-2xl shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all resize-none" placeholder="Internal notes not visible on PDF..." />
+                    <label htmlFor="invoice-hidden-remarks" className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">Hidden Remarks <span className="bg-zinc-100 px-2 py-0.5 rounded-full text-[10px] text-zinc-500">Dashboard Only</span></label>
+                    <textarea id="invoice-hidden-remarks" name="hidden_remarks" value={formData.hidden_remarks} onChange={handleChange} rows={2} className="w-full border border-neutral-200 bg-neutral-50 rounded-2xl shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 py-3 px-5 outline-none font-medium transition-all resize-none" placeholder="Internal notes not visible on PDF..." />
                 </div>
             </div>
 
@@ -830,6 +853,8 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                     {isEdit ? 'Save Changes' : 'Create Invoice'}
                 </button>
             </div>
+
+            </form>
 
             {/* ── ADD / EDIT PAYMENT MODAL ── */}
             {isPaymentModalOpen && (
@@ -960,6 +985,6 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                     onClose={() => { setIsReceiptOpen(false); setReceiptPayment(undefined); }}
                 />
             )}
-        </form>
+        </>
     )
 }

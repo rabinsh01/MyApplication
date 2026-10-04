@@ -118,6 +118,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                             <Search className="h-4 w-4 text-zinc-400" />
                         </div>
                         <input
+                            id="invoice-search"
+                            name="invoice_search"
                             type="text"
                             placeholder="Find invoices, clients or descriptions..."
                             className="pl-11 block w-full bg-white border-neutral-200 rounded-full shadow-sm focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 outline-none border py-2.5 transition-all text-zinc-900"
@@ -130,6 +132,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                         <div className="flex items-center bg-white border border-neutral-200 rounded-full px-4 py-1 shadow-sm">
                             <Filter className="h-3.5 w-3.5 text-zinc-400 mr-2" />
                             <select
+                                id="invoice-status-filter"
+                                name="invoice_status_filter"
                                 title="Status filter"
                                 className="bg-transparent text-zinc-700 font-bold py-1.5 outline-none text-xs"
                                 value={statusFilter}
@@ -144,6 +148,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
 
                         <div className="flex items-center bg-white border border-neutral-200 rounded-full px-4 py-1 shadow-sm">
                             <input
+                                id="invoice-date-start"
+                                name="invoice_date_start"
                                 type="date"
                                 title="Start Date"
                                 className="bg-transparent text-zinc-700 font-bold py-1.5 outline-none text-xs"
@@ -152,6 +158,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                             />
                             <span className="mx-2 text-slate-300">to</span>
                             <input
+                                id="invoice-date-end"
+                                name="invoice_date_end"
                                 type="date"
                                 title="End Date"
                                 className="bg-transparent text-slate-700 font-semibold py-1.5 outline-none text-xs"
@@ -166,6 +174,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${showDeleted ? 'bg-zinc-950 border-zinc-950' : 'bg-white border-neutral-300 group-hover:border-zinc-400'}`}>
                             <input
+                                id="show-deleted-invoices"
+                                name="show_deleted_invoices"
                                 type="checkbox"
                                 className="hidden"
                                 checked={showDeleted}
@@ -178,6 +188,8 @@ export default function InvoiceTable({ initialInvoices }: Props) {
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${showOverdue ? 'bg-rose-600 border-rose-600' : 'bg-white border-slate-300 group-hover:border-rose-400'}`}>
                             <input
+                                id="show-overdue-invoices"
+                                name="show_overdue_invoices"
                                 type="checkbox"
                                 className="hidden"
                                 checked={showOverdue}

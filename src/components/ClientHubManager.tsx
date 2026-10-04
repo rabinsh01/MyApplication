@@ -126,6 +126,8 @@ export default function ClientHubManager({ initialClients }: { initialClients: C
                     <div className="relative flex-1 sm:w-72 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-zinc-950 transition-colors" />
                         <input
+                            id="client-search"
+                            name="client_search"
                             type="text"
                             placeholder="Find a client..."
                             value={searchTerm}
@@ -157,6 +159,8 @@ export default function ClientHubManager({ initialClients }: { initialClients: C
                         <div>
                             <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Client Full Name</label>
                             <input
+                                id="client-name"
+                                name="client_name"
                                 type="text"
                                 required
                                 value={newName}
@@ -170,6 +174,8 @@ export default function ClientHubManager({ initialClients }: { initialClients: C
                             <div>
                                 <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Mobile Number <span className="text-neutral-300">(Optional)</span></label>
                                 <input
+                                    id="client-mobile"
+                                    name="client_mobile"
                                     type="text"
                                     value={newMobile}
                                     onChange={e => setNewMobile(e.target.value)}
@@ -180,6 +186,8 @@ export default function ClientHubManager({ initialClients }: { initialClients: C
                             <div>
                                 <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Email Address <span className="text-neutral-300">(Optional)</span></label>
                                 <input
+                                    id="client-email"
+                                    name="client_email"
                                     type="email"
                                     value={newEmail}
                                     onChange={e => setNewEmail(e.target.value)}

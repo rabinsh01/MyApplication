@@ -125,6 +125,8 @@ export default function ServiceManager({ initialServices }: { initialServices: S
                             <Search className="h-4 w-4 text-zinc-400" />
                         </div>
                         <input
+                            id="service-search"
+                            name="service_search"
                             type="text"
                             placeholder="Find a service..."
                             value={searchTerm}
@@ -165,6 +167,8 @@ export default function ServiceManager({ initialServices }: { initialServices: S
                             <div className="md:col-span-2">
                                 <label className="block text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Service Name</label>
                                 <input
+                                    id="service-name"
+                                    name="service_name"
                                     type="text"
                                     required
                                     value={name}
@@ -178,6 +182,8 @@ export default function ServiceManager({ initialServices }: { initialServices: S
                                 <div className="relative">
                                     <span className="absolute left-4 top-3 text-slate-400 font-bold text-sm">AED</span>
                                     <input
+                                        id="service-government-charge"
+                                        name="service_government_charge"
                                         type="number"
                                         required
                                         min="0"
@@ -194,6 +200,8 @@ export default function ServiceManager({ initialServices }: { initialServices: S
                                 <div className="relative">
                                     <span className="absolute left-4 top-3 text-emerald-600 font-bold text-sm">AED</span>
                                     <input
+                                        id="service-service-charge"
+                                        name="service_service_charge"
                                         type="number"
                                         required
                                         min="0"
