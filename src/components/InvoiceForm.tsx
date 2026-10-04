@@ -106,7 +106,8 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
 
     // Calculate Total Paid and Remaining Balance from Payments
     const totalPaidFromPayments = useMemo(() => {
-        if (!isEdit || payments.length === 0) return formData.paid
+        if (!isEdit) return formData.paid
+        // Always sum from payments array in edit mode (even if empty = 0)
         return payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
     }, [isEdit, payments, formData.paid])
 
@@ -341,6 +342,20 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
         return Math.max(0, formData.amount - otherPaymentsTotal)
     }, [payments, editingPayment, formData.amount])
 
+    // Re-fetch fresh payments from server and sync local state
+    const refreshPayments = async () => {
+        if (!initialData?.id) return
+        try {
+            const res = await fetch(`/api/invoices/${initialData.id}/payments`, { cache: 'no-store' })
+            if (res.ok) {
+                const fresh: InvoicePayment[] = await res.json()
+                setPayments(fresh)
+            }
+        } catch (err) {
+            console.error('Failed to refresh payments:', err)
+        }
+    }
+
     const handleSavePayment = async (e: React.FormEvent) => {
         e.preventDefault()
         const amt = Number(paymentModalData.amount) || 0
@@ -370,8 +385,6 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 })
                 const data = await res.json()
                 if (!res.ok) throw new Error(data.error || 'Failed to update payment')
-
-                setPayments(prev => prev.map(p => p.id === editingPayment.id ? data : p))
                 toast.success('Payment updated successfully')
             } else {
                 const res = await fetch(`/api/invoices/${initialData?.id}/payments`, {
@@ -386,11 +399,11 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 })
                 const data = await res.json()
                 if (!res.ok) throw new Error(data.error || 'Failed to add payment')
-
-                setPayments(prev => [...prev, data])
                 toast.success('Payment recorded successfully')
             }
             setIsPaymentModalOpen(false)
+            // Re-fetch fresh payments from server to ensure UI is in sync
+            await refreshPayments()
             router.refresh()
         } catch (err: any) {
             toast.error(err.message || 'Failed to save payment')
@@ -409,9 +422,9 @@ export default function InvoiceForm({ initialData, isEdit, knownClients = [], ne
                 const data = await res.json()
                 throw new Error(data.error || 'Failed to delete payment')
             }
-
-            setPayments(prev => prev.filter(item => item.id !== p.id))
             toast.success('Payment deleted successfully')
+            // Re-fetch fresh payments from server to ensure UI is in sync
+            await refreshPayments()
             router.refresh()
         } catch (err: any) {
             toast.error(err.message || 'Failed to delete payment')
