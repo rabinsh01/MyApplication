@@ -3,10 +3,13 @@
 -- Run this script in your Supabase SQL Editor
 -- ==============================================================
 
--- 1. Create invoice_payments table
+-- 1. Drop table if partially created in failed run
+DROP TABLE IF EXISTS public.invoice_payments CASCADE;
+
+-- 2. Create invoice_payments table (matching invoices.id type TEXT)
 CREATE TABLE IF NOT EXISTS public.invoice_payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    invoice_id UUID NOT NULL REFERENCES public.invoices(id) ON DELETE CASCADE,
+    invoice_id TEXT NOT NULL REFERENCES public.invoices(id) ON DELETE CASCADE,
     payment_date DATE NOT NULL DEFAULT CURRENT_DATE,
     amount NUMERIC NOT NULL CHECK (amount > 0),
     payment_method TEXT NOT NULL CHECK (payment_method IN ('Cash', 'Card', 'Bank Transfer', 'Online', 'Other')),
@@ -15,19 +18,19 @@ CREATE TABLE IF NOT EXISTS public.invoice_payments (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- 2. Create indexes for fast querying
+-- 3. Create indexes for fast querying
 CREATE INDEX IF NOT EXISTS idx_invoice_payments_invoice_id ON public.invoice_payments(invoice_id);
 CREATE INDEX IF NOT EXISTS idx_invoice_payments_payment_date ON public.invoice_payments(payment_date);
 
--- 3. Enable Row Level Security (RLS)
+-- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.invoice_payments ENABLE ROW LEVEL SECURITY;
 
--- 4. RLS Policy for Authenticated Users
+-- 5. RLS Policy for Authenticated Users
 DROP POLICY IF EXISTS "Allow authenticated access to invoice_payments" ON public.invoice_payments;
 CREATE POLICY "Allow authenticated access to invoice_payments" ON public.invoice_payments
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- 5. Data Migration for Pre-existing Invoices
+-- 6. Data Migration for Pre-existing Invoices
 -- Automatically creates an initial payment record for existing invoices that have `paid > 0`
 -- and do not yet have any records in `invoice_payments`.
 INSERT INTO public.invoice_payments (invoice_id, payment_date, amount, payment_method, notes)
